@@ -1,0 +1,7 @@
+services:
+  airbnb-prototype:
+    build: .
+    container_name: airbnb-audit-prototype
+    ports:
+      - "8080:80"
+    restart: unless-stopped

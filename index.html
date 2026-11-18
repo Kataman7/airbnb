@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airbnb · Prototype Audit UX, Fidélité &amp; IA (Annecy)</title>
+
+  <!-- Google Fonts : Plus Jakarta Sans (400, 500, 600, 700) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coral: '#FF385C',
+            'coral-hover': '#E31C5F',
+            ink: '#222222',
+            muted: '#717171',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS (CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Styles personnalisés -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-white text-[#222222] min-h-screen flex flex-col">
+
+  <!-- =======================================================================
+       HEADER GLOBAL
+       ======================================================================= -->
+  <header class="sticky top-0 z-50 bg-white border-b border-[#EBEBEB]">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
+      <!-- Ligne supérieure : Logo + Onglets Offre + Badge Fidélité -->
+      <div class="h-16 sm:h-20 flex items-center justify-between gap-4">
+        <!-- Logo Bélo Airbnb -->
+        <button id="logo-home-btn" class="flex items-center gap-2 text-[#FF385C] focus:outline-none shrink-0" title="Retour à la recherche">
+          <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="w-8 h-8 fill-current">
+            <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.01.415.001.228c0 4.062-2.877 6.478-6.357 6.478-2.224 0-4.556-1.258-6.709-3.386l-.257-.26-.172-.179h-.011l-.176.185c-2.044 2.1-4.267 3.42-6.414 3.615l-.28.019-.267.006C5.377 31 2.5 28.584 2.5 24.522l.005-.469c.026-.928.23-1.768.83-3.244l.216-.524c.966-2.298 6.083-12.989 7.707-16.034C12.537 1.963 13.992 1 16 1zm0 2c-1.239 0-2.053.539-2.987 2.21l-.523 1.008c-1.926 3.776-6.06 12.43-7.031 14.692l-.345.836c-.427 1.071-.573 1.655-.605 2.24l-.009.33v.206C4.5 27.395 6.411 29 8.857 29c1.773 0 3.87-1.236 5.831-3.354-2.295-2.938-3.855-6.45-3.855-8.91 0-2.913 1.933-5.386 5.178-5.42 3.223.034 5.156 2.507 5.156 5.42 0 2.456-1.555 5.96-3.855 8.907C19.277 27.766 21.37 29 23.142 29c2.447 0 4.358-1.605 4.358-4.478l-.004-.411c-.019-.672-.17-1.296-.714-2.62l-.248-.6c-1.065-2.478-5.993-12.768-7.538-15.664C18.053 3.539 17.24 3 16 3zm.01 10.316c-2.01.021-3.177 1.514-3.177 3.42 0 1.797 1.18 4.58 2.955 7.044l.21.287.174-.234c1.73-2.385 2.898-5.066 2.989-6.875l.006-.221c0-1.906-1.167-3.4-3.156-3.421h-.001z"></path>
+          </svg>
+          <span class="hidden sm:inline text-xl font-bold tracking-tight">airbnb</span>
+        </button>
+
+        <!-- Séparation claire de l'offre : Logements / Hôtels / Services -->
+        <nav class="flex items-center gap-1 sm:gap-2 bg-[#F7F7F7] p-1 rounded-full border border-[#EBEBEB]" data-audit="Séparation Offre">
+          <span class="audit-tag">Séparation claire de l'offre</span>
+          <button data-tab="logements" class="offer-tab px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition bg-white text-[#222222] shadow-sm flex items-center gap-1.5">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span>Logements</span>
+          </button>
+          <button data-tab="hotels" class="offer-tab px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition text-[#717171] hover:text-[#222222] flex items-center gap-1.5">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+            <span>Hôtels</span>
+          </button>
+          <button data-tab="services" class="offer-tab px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition text-[#717171] hover:text-[#222222] flex items-center gap-1.5">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            <span>Services</span>
+          </button>
+        </nav>
+
+        <!-- Programme de fidélité + Profil -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button id="loyalty-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DDDDDD] hover:border-[#222222] bg-white transition text-xs sm:text-sm font-semibold" data-audit="Fidélité">
+            <span class="audit-tag">Fidélité · Airbnb Pass</span>
+            <span class="w-2 h-2 rounded-full bg-[#FF385C]"></span>
+            <span class="hidden md:inline">Airbnb Pass ·</span>
+            <span>Niveau 2 <span class="text-[#FF385C]">(-10%)</span></span>
+          </button>
+          <div class="w-9 h-9 rounded-full bg-[#222222] text-white text-xs font-bold flex items-center justify-center shrink-0" title="Camille Laurent">
+            CL
+          </div>
+        </div>
+      </div>
+
+      <!-- Barre de recherche en pilule + Toggle Airbnb Imagine -->
+      <div id="header-search-row" class="pb-4 flex flex-col items-center">
+        <div class="w-full max-w-4xl flex flex-col md:flex-row items-stretch md:items-center gap-2.5">
+          <!-- Toggle Airbnb Imagine -->
+          <div class="flex items-center justify-center bg-[#F7F7F7] border border-[#EBEBEB] rounded-full p-1 shrink-0" data-audit="Airbnb Imagine">
+            <span class="audit-tag">IA · Airbnb Imagine</span>
+            <button id="mode-classic-btn" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-[#222222] shadow-sm transition">
+              Recherche
+            </button>
+            <button id="mode-imagine-btn" class="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#717171] hover:text-[#222222] transition flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#FF385C]"></i>
+              <span>Airbnb Imagine</span>
+            </button>
+          </div>
+
+          <!-- Pilule Recherche Classique -->
+          <div id="classic-search-bar" class="search-pill flex-1 bg-white rounded-full px-2 py-1.5 flex items-center justify-between gap-2">
+            <div class="flex items-center flex-1 divide-x divide-[#EBEBEB] overflow-hidden">
+              <div class="px-4 py-1 min-w-0 flex-1">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-[#222222]">Destination</div>
+                <div class="text-sm font-medium text-[#222222] truncate">Annecy, Haute-Savoie</div>
+              </div>
+              <button id="open-calendar-btn" class="px-4 py-1 text-left hover:bg-[#F7F7F7] rounded-lg transition min-w-0 flex-1" data-audit="Calendrier Unifié">
+                <span class="audit-tag">Calendrier harmonisé</span>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-[#222222]">Dates</div>
+                <div id="header-dates-label" class="text-sm font-medium text-[#222222] truncate">11–14 déc. · 3 nuits</div>
+              </button>
+              <div class="hidden sm:block px-4 py-1 min-w-0">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-[#222222]">Voyageurs</div>
+                <div class="text-sm font-medium text-[#717171] truncate">2 voyageurs</div>
+              </div>
+            </div>
+            <button id="classic-search-go" class="w-10 h-10 rounded-full bg-[#FF385C] hover:bg-[#E31C5F] text-white flex items-center justify-center shrink-0 transition" aria-label="Rechercher">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Pilule Airbnb Imagine (champ libre) -->
+          <div id="imagine-search-bar" class="hidden search-pill flex-1 bg-white rounded-full px-3 py-1.5 flex items-center gap-2 border-[#FF385C]/40">
+            <i data-lucide="sparkles" class="w-4 h-4 text-[#FF385C] ml-2 shrink-0"></i>
+            <input id="imagine-input" type="text" class="flex-1 bg-transparent text-sm text-[#222222] focus:outline-none py-1.5" value="3 jours dans un endroit authentique, avec ma copine, budget 400€/pers, bonne cuisine et nature" />
+            <button id="imagine-submit-btn" class="px-4 py-2 rounded-full bg-[#FF385C] hover:bg-[#E31C5F] text-white text-xs font-bold shrink-0 transition">
+              Imaginer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =======================================================================
+       PANNEAU COMPARATIF AIRBNB IMAGINE (3 scénarios modulables)
+       ======================================================================= -->
+  <section id="imagine-panel" class="hidden bg-[#F7F7F7] border-b border-[#DDDDDD]">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FF385C]/10 text-[#FF385C] text-xs font-bold">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Airbnb Imagine
+            </span>
+            <h2 class="text-lg font-bold text-[#222222]">3 scénarios modulables pour votre envie</h2>
+          </div>
+          <p id="imagine-prompt-echo" class="text-xs text-[#717171] mt-1"></p>
+        </div>
+        <button id="close-imagine-btn" class="self-start sm:self-auto px-3 py-1.5 rounded-full border border-[#DDDDDD] bg-white text-xs font-semibold hover:border-[#222222] transition">
+          Fermer le comparateur
+        </button>
+      </div>
+      <div id="imagine-scenarios-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Injecté par app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- =======================================================================
+       CONTENEUR PRINCIPAL DES 3 VUES
+       ======================================================================= -->
+  <main class="flex-1">
+
+    <!-- ---------------------------------------------------------------------
+         VUE 1 : RECHERCHE & CARTE (Split-screen)
+         --------------------------------------------------------------------- -->
+    <section id="view-search" class="view-section">
+      <!-- Barre de Filtres Intelligents -->
+      <div class="border-b border-[#EBEBEB] bg-white">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-3 flex items-center justify-between gap-4">
+          <div id="smart-filters-bar" class="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1" data-audit="Filtres Intelligents">
+            <span class="audit-tag">Filtres intelligents (impact résultats)</span>
+            <!-- Injecté par app.js -->
+          </div>
+          <div class="hidden lg:flex items-center gap-2 text-xs text-[#717171] shrink-0">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-[#008A05]"></i>
+            <span>Prix affichés : <strong>Total TTC frais inclus</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Split-screen Liste (gauche) + Carte Leaflet (droite) -->
+      <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row">
+        <!-- Colonne Liste -->
+        <div class="w-full lg:w-[58%] xl:w-[60%] px-4 sm:px-6 lg:pl-10 lg:pr-6 py-5">
+          <!-- Bandeau Airbnb Flex -->
+          <div id="airbnb-flex-banner" class="mb-5 p-3.5 rounded-xl border border-[#DDDDDD] bg-[#F7F7F7] flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-audit="Airbnb Flex">
+            <span class="audit-tag">Airbnb Flex · Sans fausse urgence</span>
+            <div class="flex items-start sm:items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-white border border-[#DDDDDD] flex items-center justify-center shrink-0 text-[#FF385C]">
+                <i data-lucide="calendar-range" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold uppercase tracking-wide text-[#FF385C]">Airbnb Flex · Tarif réel constaté</div>
+                <p id="flex-banner-text" class="text-sm text-[#222222] font-medium">
+                  Décaler d'un jour (ven-dim → jeu-sam) : <strong>-48 € au total</strong> · même temps de trajet · annulation gratuite
+                </p>
+              </div>
+            </div>
+            <button id="apply-flex-btn" class="px-3.5 py-2 rounded-lg border border-[#222222] bg-white hover:bg-[#222222] hover:text-white text-xs font-bold transition shrink-0">
+              Appliquer (-48 €)
+            </button>
+          </div>
+
+          <!-- Compteur résultats + bouton mobile carte -->
+          <div class="flex items-center justify-between mb-4">
+            <h1 id="results-count-title" class="text-sm sm:text-base font-semibold text-[#222222]">
+              8 logements à Annecy · 11–14 déc. (3 nuits)
+            </h1>
+            <button id="mobile-map-toggle" class="lg:hidden px-3.5 py-1.5 rounded-full bg-[#222222] text-white text-xs font-semibold flex items-center gap-1.5">
+              <i data-lucide="map" class="w-3.5 h-3.5"></i>
+              <span>Voir la carte</span>
+            </button>
+          </div>
+
+          <!-- Grille des résultats -->
+          <div id="listings-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-7">
+            <!-- Injecté par app.js -->
+          </div>
+        </div>
+
+        <!-- Colonne Carte Leaflet Sticky -->
+        <div id="map-column" class="hidden lg:block w-full lg:w-[42%] xl:w-[40%] lg:sticky lg:top-[138px] lg:h-[calc(100vh-138px)] p-4 lg:p-0 lg:pr-6 lg:py-5">
+          <div class="w-full h-[460px] lg:h-full rounded-2xl overflow-hidden border border-[#DDDDDD] relative" data-audit="Clustering Carte">
+            <span class="audit-tag">Clustering anti-chevauchement</span>
+            <div id="leaflet-map"></div>
+            <div class="absolute bottom-3 left-3 z-[400] bg-white/95 backdrop-blur px-3 py-1.5 rounded-full border border-[#DDDDDD] shadow-sm text-[11px] font-semibold text-[#222222] flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-[#222222]"></span>
+              <span>Pastilles regroupées automatiquement en centre-ville</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------------
+         VUE 2 : FICHE LOGEMENT
+         --------------------------------------------------------------------- -->
+    <section id="view-detail" class="view-section hidden">
+      <div id="detail-content" class="max-w-[1160px] mx-auto px-4 sm:px-6 lg:px-10 py-6 pb-20">
+        <!-- Injecté dynamiquement par app.js -->
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------------------
+         VUE 3 : PARCOURS D'ACHAT / CHECKOUT
+         --------------------------------------------------------------------- -->
+    <section id="view-checkout" class="view-section hidden">
+      <div id="checkout-content" class="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-10 py-8 pb-24">
+        <!-- Injecté dynamiquement par app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =======================================================================
+       BOUTON FLOTTANT « MODE AUDIT : OFF / ON » (Soutenance)
+       ======================================================================= -->
+  <button id="audit-toggle-btn" class="audit-toggle-fab flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#222222] text-white text-xs sm:text-sm font-bold border border-white/20 hover:scale-[1.02] transition">
+    <span id="audit-dot" class="w-2.5 h-2.5 rounded-full bg-[#717171]"></span>
+    <span>Mode Audit : <span id="audit-state-label">OFF</span></span>
+  </button>
+
+  <!-- =======================================================================
+       MODALES & PANNEAUX LATÉRAUX
+       ======================================================================= -->
+
+  <!-- Modale Calendrier Harmonisé -->
+  <div id="calendar-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#DDDDDD]" data-audit="Calendrier Unifié">
+      <span class="audit-tag">Calendrier harmonisé desktop &amp; mobile</span>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-bold text-[#222222]">Choisir vos dates · Annecy</h3>
+          <p id="cal-selection-summary" class="text-xs text-[#717171] mt-0.5">Sélection actuelle : 11–14 déc. · 3 nuits</p>
+        </div>
+        <button id="close-calendar-btn" class="p-2 rounded-full hover:bg-[#F7F7F7]">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Légende des couleurs lisible -->
+      <div class="flex flex-wrap items-center gap-3 mb-4 p-2.5 rounded-xl bg-[#F7F7F7] text-xs">
+        <span class="font-semibold text-[#222222]">Tarifs / nuit :</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#EDF7ED] border border-[#14532D]/30"></span> Économique (&lt; 110 €)</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#FEF7E0] border border-[#78350F]/30"></span> Standard (110–145 €)</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-[#FFF0F2] border border-[#9F1239]/30"></span> Forte demande (&gt; 145 €)</span>
+      </div>
+
+      <div class="text-sm font-bold text-[#222222] mb-2" id="cal-month-label">Décembre 2026</div>
+      <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-semibold text-[#717171] mb-1.5">
+        <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
+      </div>
+      <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5">
+        <!-- Injecté par app.js -->
+      </div>
+
+      <div class="mt-5 pt-4 border-t border-[#EBEBEB] flex items-center justify-between">
+        <div class="text-xs text-[#717171]">
+          La couleur tarifaire reste visible sur les dates sélectionnées.
+        </div>
+        <button id="confirm-calendar-btn" class="px-5 py-2.5 rounded-lg bg-[#222222] text-white text-sm font-semibold hover:bg-black transition">
+          Valider les dates
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Programme de Fidélité Airbnb Pass -->
+  <div id="loyalty-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-[#DDDDDD] max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-full bg-[#FF385C]/10 text-[#FF385C] flex items-center justify-center">
+            <i data-lucide="award" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-[#222222]">Airbnb Pass · Programme de fidélité</h3>
+            <p class="text-xs text-[#717171]">Camille Laurent · 6 séjours validés (plus que 4 pour le Niveau 3)</p>
+          </div>
+        </div>
+        <button id="close-loyalty-btn" class="p-2 rounded-full hover:bg-[#F7F7F7]">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="loyalty-tiers-list" class="space-y-3">
+        <!-- Injecté par app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Planifier en groupe (Airbnb Together) -->
+  <div id="together-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-[#DDDDDD] max-h-[90vh] overflow-y-auto" data-audit="Airbnb Together">
+      <span class="audit-tag">Planification de groupe · Airbnb Together</span>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-bold text-[#222222]">Airbnb Together · Planifier en groupe</h3>
+          <p class="text-xs text-[#717171]">Partagez vos critères sans exposer vos budgets personnels</p>
+        </div>
+        <button id="close-together-btn" class="p-2 rounded-full hover:bg-[#F7F7F7]">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="together-modal-body">
+        <!-- Injecté par app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau Latéral Airbnb Care (Imprévu voyageur) -->
+  <div id="care-drawer" class="hidden fixed inset-0 z-[110] bg-black/40 backdrop-blur-[1px] flex justify-end">
+    <div class="bg-white w-full max-w-md h-full shadow-2xl border-l border-[#DDDDDD] p-6 overflow-y-auto flex flex-col justify-between" data-audit="Airbnb Care">
+      <span class="audit-tag">Assistance proactive · Airbnb Care</span>
+      <div id="care-drawer-body">
+        <!-- Injecté par app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Avant de réserver (depuis Checkout) -->
+  <div id="before-booking-modal" class="hidden fixed inset-0 z-[105] bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#DDDDDD]">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-[#222222]">Avant de réserver · Règles &amp; Annulation</h3>
+        <button id="close-before-booking-btn" class="p-2 rounded-full hover:bg-[#F7F7F7]">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="before-booking-modal-body" class="space-y-4 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- Toast de notification discret -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-[120] space-y-2 pointer-events-none"></div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
