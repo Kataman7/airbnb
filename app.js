@@ -19,7 +19,10 @@
     togetherVotes: { "Thomas": "En attente" },
     imagineOpen: false,
     imagineSelections: {}, // scenarioId -> { itemIdx: altIdx }
-    calPickStart: null
+    calPickStart: null,
+    communityTab: "recap", // 'recap' | 'clubs'
+    joinedClubs: { "club-gastro": true },
+    selectedExperiences: [] // ids des expériences testées sur les dates du séjour
   };
 
   let map = null;
@@ -487,31 +490,143 @@
         ? item.localExperiences
         : DATA.listings[0].localExperiences;
 
+    const stayDays = [];
+    for (let d = state.checkIn; d <= state.checkOut; d++) {
+      stayDays.push(d);
+    }
+
     const localHtml = localExps
-      .map(
-        (exp) => `
-      <div class="rounded-xl border border-[#EBEBEB] overflow-hidden bg-white flex flex-col">
+      .map((exp) => {
+        const availableOnStay = (exp.availableDays || stayDays).filter((d) => stayDays.includes(d));
+        const isAvailable = availableOnStay.length > 0;
+        const firstSlot = isAvailable ? `${availableOnStay[0]} déc. · ${exp.slotTime || "14h00"}` : null;
+        const isAdded = state.selectedExperiences.includes(exp.id);
+
+        return `
+      <div class="rounded-xl border ${isAdded ? "border-[#222222] ring-1 ring-[#222222]" : "border-[#EBEBEB]"} overflow-hidden bg-white flex flex-col">
         <div class="h-32 overflow-hidden relative">
           <img src="${exp.image}" alt="${exp.title}" class="w-full h-full object-cover" />
           <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-white/95 text-[11px] font-bold text-[#222222]">★ ${exp.rating}</span>
+          <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+            isAvailable ? "bg-[#ECFDF5] text-[#065F46]" : "bg-[#FEF3C7] text-[#92400E]"
+          }">
+            ${isAvailable ? `Dispo le ${firstSlot}` : "Complet sur ces dates"}
+          </span>
         </div>
         <div class="p-3 flex-1 flex flex-col justify-between">
           <div>
             <div class="text-[11px] font-semibold text-[#FF385C]">${exp.organizer}</div>
             <h4 class="text-xs font-bold text-[#222222] mt-0.5 leading-snug">${exp.title}</h4>
+            ${
+              exp.hostNote
+                ? `<p class="text-[11px] italic text-[#484848] mt-1.5 bg-[#F7F7F7] px-2 py-1.5 rounded-lg">« ${exp.hostNote} » — ${item.host.name}</p>`
+                : ""
+            }
             <div class="text-[11px] text-[#717171] mt-1.5 space-y-0.5">
               <div>Durée : ${exp.duration} · ${exp.capacity}</div>
               <div class="text-[#14532D] font-medium">${exp.accessibility}</div>
             </div>
           </div>
-          <div class="mt-3 pt-2 border-t border-[#EBEBEB] flex items-center justify-between">
+          <div class="mt-3 pt-2 border-t border-[#EBEBEB] flex items-center justify-between gap-2">
             <span class="text-xs font-bold text-[#222222]">${exp.price} € <span class="font-normal text-[#717171]">/ pers.</span></span>
-            <button class="text-[11px] font-bold underline text-[#222222]" onclick="window.__toast('Expérience « ${exp.title.replace(/'/g, "\\'")} » ajoutée à vos favoris')">Découvrir</button>
+            <button
+              data-exp-id="${exp.id}"
+              data-exp-title="${exp.title.replace(/"/g, "&quot;")}"
+              data-exp-slot="${firstSlot || ""}"
+              class="toggle-exp-btn px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
+                !isAvailable
+                  ? "bg-[#F7F7F7] text-[#717171] cursor-not-allowed"
+                  : isAdded
+                  ? "bg-[#222222] text-white"
+                  : "bg-[#FF385C]/10 text-[#FF385C] hover:bg-[#FF385C] hover:text-white"
+              }"
+              ${!isAvailable ? "disabled" : ""}
+            >
+              ${!isAvailable ? "Indisponible" : isAdded ? "Ajouté au séjour ✓" : "Tester sur ces dates"}
+            </button>
           </div>
         </div>
-      </div>`
-      )
+      </div>`;
+      })
       .join("");
+
+    const aiReviews = item.aiReviewsSummary || {
+      neighborhoodAvgRating: "4,68",
+      wouldReturnPct: 92,
+      summary: item.trustDetails?.aiSummary || "Les voyageurs soulignent la qualité de l'accueil et la conformité du lieu.",
+      highlights: ["Emplacement apprécié", "Propreté soignée", "Communication fluide"],
+      watchOut: ""
+    };
+
+    const itemRatingNum = parseFloat(String(item.rating).replace(",", "."));
+    const neighRatingNum = parseFloat(String(aiReviews.neighborhoodAvgRating || "4,68").replace(",", "."));
+    const ratingDelta = (itemRatingNum - neighRatingNum).toFixed(2).replace(".", ",");
+    const wouldReturnPct = aiReviews.wouldReturnPct || 92;
+
+    const aiReviewsHtml = `
+      <section class="p-5 rounded-2xl border border-[#DDDDDD] bg-white space-y-4" data-audit="Résumé IA des avis">
+        <span class="audit-tag">IA · Résumé, comparatif quartier &amp; taux de retour</span>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-full bg-[#FF385C]/10 text-[#FF385C] flex items-center justify-center shrink-0">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+            </span>
+            <div>
+              <h3 class="text-base font-bold text-[#222222]">Avis, quartier &amp; résumé IA</h3>
+              <p class="text-[11px] text-[#717171]">Synthèse générée à partir de ${item.reviewsCount} avis vérifiés (★ ${item.rating})</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-[#F7F7F7] border border-[#EBEBEB] text-[11px] font-semibold text-[#222222]">
+            IA · Tendance globale positive
+          </span>
+        </div>
+
+        <!-- Comparatif quartier & Part des voyageurs qui veulent revenir -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3.5 rounded-xl bg-[#F7F7F7] border border-[#EBEBEB]">
+            <div class="text-[11px] font-semibold text-[#717171]">Comparatif avec le quartier</div>
+            <div class="mt-1 flex items-baseline gap-2">
+              <span class="text-lg font-bold text-[#222222]">★ ${item.rating}</span>
+              <span class="text-xs text-[#717171]">vs ★ ${aiReviews.neighborhoodAvgRating || "4,68"} en moyenne</span>
+            </div>
+            <div class="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-[#008A05]">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+              <span>+${ratingDelta} pt au-dessus du quartier</span>
+            </div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-[#F7F7F7] border border-[#EBEBEB]">
+            <div class="text-[11px] font-semibold text-[#717171]">Voyageurs déclarant vouloir revenir</div>
+            <div class="mt-1 flex items-baseline justify-between">
+              <span class="text-lg font-bold text-[#222222]">${wouldReturnPct} %</span>
+              <span class="text-[11px] font-semibold text-[#FF385C]">Fidélité élevée</span>
+            </div>
+            <div class="mt-2 h-2 rounded-full bg-[#DDDDDD] overflow-hidden">
+              <div class="h-full rounded-full bg-[#FF385C]" style="width: ${wouldReturnPct}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-sm text-[#222222] leading-relaxed">${aiReviews.summary}</p>
+        <div class="flex flex-wrap gap-2">
+          ${aiReviews.highlights
+            .map(
+              (h) => `
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#ECFDF5] text-[#065F46] text-xs font-semibold">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>${h}</span>
+            </span>`
+            )
+            .join("")}
+        </div>
+        ${
+          aiReviews.watchOut
+            ? `<div class="pt-2.5 border-t border-[#EBEBEB] flex items-start gap-2 text-xs text-[#717171]">
+                <i data-lucide="info" class="w-4 h-4 text-[#717171] shrink-0 mt-0.5"></i>
+                <span><strong class="text-[#222222]">À noter selon les avis :</strong> ${aiReviews.watchOut}</span>
+              </div>`
+            : ""
+        }
+      </section>`;
 
     container.innerHTML = `
       <!-- Bouton retour -->
@@ -616,10 +731,15 @@
 
           <!-- Module Airbnb Local -->
           <section class="space-y-3 pt-4 border-t border-[#EBEBEB]" data-audit="Airbnb Local">
-            <span class="audit-tag">Airbnb Local · Expériences à proximité</span>
-            <div class="flex items-center justify-between">
-              <h3 class="text-base font-bold text-[#222222]">Airbnb Local · Autour du logement</h3>
-              <span class="text-xs text-[#717171]">Artisans &amp; producteurs vérifiés</span>
+            <span class="audit-tag">Sélection hôte · Dispo aux dates du séjour</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base font-bold text-[#222222]">Expériences recommandées par ${item.host.name}</h3>
+                <p class="text-xs text-[#717171]">Disponibilités filtrées pour votre séjour du ${state.checkIn} au ${state.checkOut} déc. 2026</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-[#F7F7F7] border border-[#EBEBEB] text-[11px] font-semibold text-[#222222]">
+                Sélection de l'hôte
+              </span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               ${localHtml}
@@ -649,6 +769,9 @@
               <div><strong>Palier 2 :</strong> ${item.cancellation.tier2Desc} jusqu'au <strong>${item.cancellation.tier2Date}</strong>.</div>
             </div>
           </section>
+
+          <!-- Résumé IA des commentaires voyageurs -->
+          ${aiReviewsHtml}
         </div>
 
         <!-- Colonne droite : Carte de réservation sticky -->
@@ -704,6 +827,16 @@
                   ? `<div class="flex justify-between text-[#008A05] font-semibold"><span>Avantage Airbnb Flex</span><span>-${p.flexDiscount} €</span></div>`
                   : ""
               }
+              ${
+                state.selectedExperiences.length > 0
+                  ? `<div class="flex justify-between text-[#FF385C] font-semibold">
+                      <span>Expériences hôte testées (${state.selectedExperiences.length})</span>
+                      <span>+${localExps
+                        .filter((e) => state.selectedExperiences.includes(e.id))
+                        .reduce((acc, e) => acc + e.price, 0)} € / pers.</span>
+                    </div>`
+                  : ""
+              }
               <div class="pt-3 border-t border-[#EBEBEB] flex justify-between text-sm font-bold text-[#222222]">
                 <span>Total TTC</span>
                 <span>${p.totalTTC} €</span>
@@ -740,6 +873,23 @@
     document.getElementById("back-to-search-btn").addEventListener("click", () => navigateTo("search"));
     document.getElementById("go-to-checkout-btn").addEventListener("click", () => navigateTo("checkout"));
     document.getElementById("open-together-btn").addEventListener("click", openTogetherModal);
+
+    container.querySelectorAll(".toggle-exp-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const expId = btn.dataset.expId;
+        const expTitle = btn.dataset.expTitle;
+        const expSlot = btn.dataset.expSlot;
+        const idx = state.selectedExperiences.indexOf(expId);
+        if (idx >= 0) {
+          state.selectedExperiences.splice(idx, 1);
+          showToast(`Expérience « ${expTitle} » retirée de votre test séjour`);
+        } else {
+          state.selectedExperiences.push(expId);
+          showToast(`Expérience « ${expTitle} » ajoutée pour le ${expSlot}`);
+        }
+        openListingDetail(item.id);
+      });
+    });
   }
 
   // ------------------------------------------------------------------------
@@ -857,6 +1007,16 @@
               <div class="flex justify-between"><span>Frais de service</span><span>${p.serviceFee} €</span></div>
               <div class="flex justify-between"><span>Taxes de séjour</span><span>${p.cityTax.toFixed(2).replace(".", ",")} €</span></div>
               <div class="flex justify-between text-[#008A05] font-semibold"><span>Remise Pass Niveau 2 (-10 %)</span><span>-${p.loyaltyDiscount} €</span></div>
+              ${
+                state.selectedExperiences.length > 0
+                  ? `<div class="flex justify-between text-[#FF385C] font-semibold">
+                      <span>Expériences hôte testées (${state.selectedExperiences.length})</span>
+                      <span>+${localExps
+                        .filter((e) => state.selectedExperiences.includes(e.id))
+                        .reduce((acc, e) => acc + e.price, 0)} € / pers.</span>
+                    </div>`
+                  : ""
+              }
               <div class="pt-3 border-t border-[#EBEBEB] flex justify-between text-sm font-bold text-[#222222]">
                 <span>Total TTC</span>
                 <span>${p.totalTTC} €</span>
@@ -1060,6 +1220,137 @@
       })
       .join("");
     document.getElementById("loyalty-modal").classList.remove("hidden");
+  }
+
+  function openCommunityModal(tab) {
+    if (tab) state.communityTab = tab;
+    renderCommunityModal();
+    document.getElementById("community-modal").classList.remove("hidden");
+  }
+
+  function renderCommunityModal() {
+    const recapTabBtn = document.getElementById("community-tab-recap");
+    const clubsTabBtn = document.getElementById("community-tab-clubs");
+    const activeCls = "px-4 py-1.5 rounded-full text-xs font-semibold bg-white text-[#222222] shadow-sm transition";
+    const idleCls = "px-4 py-1.5 rounded-full text-xs font-semibold text-[#717171] hover:text-[#222222] transition";
+
+    recapTabBtn.className = state.communityTab === "recap" ? activeCls : idleCls;
+    clubsTabBtn.className = state.communityTab === "clubs" ? activeCls : idleCls;
+
+    const body = document.getElementById("community-modal-body");
+
+    if (state.communityTab === "recap") {
+      const r = DATA.user.annualRecap;
+      body.innerHTML = `
+        <div class="space-y-4">
+          <div class="rounded-2xl p-5 bg-gradient-to-br from-[#222222] via-[#2b2b2b] to-[#FF385C]/90 text-white space-y-4 shadow-md">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-full bg-white/15 text-[11px] font-bold">Airbnb Wrapped · ${r.year}</span>
+              <span class="text-xs font-semibold opacity-90">${DATA.user.name}</span>
+            </div>
+            <div>
+              <h4 class="text-xl font-bold">Votre année en voyage</h4>
+              <p class="text-xs text-white/80 mt-0.5">${r.topStyle}</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div class="p-3 rounded-xl bg-white/10">
+                <div class="text-lg font-bold">${r.stays}</div>
+                <div class="text-[11px] text-white/80">Séjours effectués</div>
+              </div>
+              <div class="p-3 rounded-xl bg-white/10">
+                <div class="text-lg font-bold">${r.totalNights}</div>
+                <div class="text-[11px] text-white/80">Nuits locales</div>
+              </div>
+              <div class="p-3 rounded-xl bg-white/10">
+                <div class="text-lg font-bold">${r.savingsEuro} €</div>
+                <div class="text-[11px] text-white/80">Économies Pass</div>
+              </div>
+              <div class="p-3 rounded-xl bg-white/10">
+                <div class="text-lg font-bold">-${r.co2SavedKg} kg</div>
+                <div class="text-[11px] text-white/80">CO₂ évité (train/éco)</div>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-white/15 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span>Villes : <strong>${r.citiesVisited.join(" · ")}</strong></span>
+              <span>Hôte coup de cœur : <strong>${r.favoriteHost}</strong></span>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs text-[#717171]">Carte prête à être partagée sur vos réseaux sociaux</span>
+            <div class="flex items-center gap-2">
+              <button id="copy-recap-btn" class="px-3.5 py-2 rounded-full border border-[#DDDDDD] hover:border-[#222222] text-xs font-semibold transition flex items-center gap-1.5">
+                <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                <span>Copier le lien</span>
+              </button>
+              <button id="share-recap-btn" class="btn-airbnb px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1.5">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                <span>Partager mon récap 2026</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      lucide.createIcons({ nodes: [body] });
+
+      const shareText = `Mon récap Airbnb ${r.year} : ${r.stays} séjours (${r.totalNights} nuits) à ${r.citiesVisited.join(", ")} · ${r.savingsEuro} € économisés avec Airbnb Pass !`;
+      document.getElementById("copy-recap-btn").addEventListener("click", () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText("https://airbnb-prototype.local/recap/camille-2026").catch(() => {});
+        }
+        showToast("Lien du récap annuel 2026 copié dans le presse-papiers", "success");
+      });
+      document.getElementById("share-recap-btn").addEventListener("click", () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareText).catch(() => {});
+        }
+        showToast("Carte récap 2026 prête et copiée pour partage social !", "success");
+      });
+    } else {
+      body.innerHTML = `
+        <div class="space-y-3">
+          ${DATA.user.communityClubs
+            .map((club) => {
+              const joined = !!state.joinedClubs[club.id];
+              const count = club.members + (joined && !club.joined ? 1 : !joined && club.joined ? -1 : 0);
+              return `
+              <div class="p-4 rounded-xl border ${joined ? "border-[#222222] bg-[#F7F7F7]" : "border-[#EBEBEB] bg-white"} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="space-y-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-bold text-[#222222]">${club.name}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-[#FF385C]/10 text-[#FF385C] text-[10px] font-bold">Animé par ${club.hostName}</span>
+                  </div>
+                  <div class="text-xs text-[#717171]">${club.hostRole} · <strong>${count} membres</strong></div>
+                  <div class="text-xs text-[#222222] pt-0.5">Prochain rendez-vous : <strong>${club.nextEvent}</strong></div>
+                </div>
+                <button data-club-id="${club.id}" data-club-name="${club.name.replace(/"/g, "&quot;")}" class="toggle-club-btn shrink-0 px-4 py-2 rounded-full text-xs font-bold transition ${
+                  joined
+                    ? "bg-[#222222] text-white"
+                    : "border border-[#222222] bg-white text-[#222222] hover:bg-[#F7F7F7]"
+                }">
+                  ${joined ? "Membre ✓" : "Rejoindre le club"}
+                </button>
+              </div>`;
+            })
+            .join("")}
+        </div>
+      `;
+
+      body.querySelectorAll(".toggle-club-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const cid = btn.dataset.clubId;
+          const cname = btn.dataset.clubName;
+          state.joinedClubs[cid] = !state.joinedClubs[cid];
+          renderCommunityModal();
+          showToast(
+            state.joinedClubs[cid]
+              ? `Vous avez rejoint « ${cname} »`
+              : `Vous avez quitté « ${cname} »`,
+            state.joinedClubs[cid] ? "success" : "info"
+          );
+        });
+      });
+    }
   }
 
   function openTogetherModal() {
@@ -1309,14 +1600,27 @@
     document.getElementById("confirm-calendar-btn").addEventListener("click", () => {
       calModal.classList.add("hidden");
       renderSearchView();
+      if (state.view === "detail") {
+        openListingDetail(state.selectedListingId);
+      }
       showToast(`Dates mises à jour : ${formatDatesLabel()}`);
     });
 
-    // Modale Fidélité
+    // Modale Fidélité & Communauté
     document.getElementById("loyalty-btn").addEventListener("click", openLoyaltyModal);
     document.getElementById("close-loyalty-btn").addEventListener("click", () => {
       document.getElementById("loyalty-modal").classList.add("hidden");
     });
+    document.getElementById("open-community-from-loyalty-btn").addEventListener("click", () => {
+      document.getElementById("loyalty-modal").classList.add("hidden");
+      openCommunityModal("recap");
+    });
+    document.getElementById("community-btn").addEventListener("click", () => openCommunityModal("recap"));
+    document.getElementById("close-community-btn").addEventListener("click", () => {
+      document.getElementById("community-modal").classList.add("hidden");
+    });
+    document.getElementById("community-tab-recap").addEventListener("click", () => openCommunityModal("recap"));
+    document.getElementById("community-tab-clubs").addEventListener("click", () => openCommunityModal("clubs"));
 
     // Modale Together
     document.getElementById("close-together-btn").addEventListener("click", () => {

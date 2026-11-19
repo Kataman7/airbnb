@@ -46,7 +46,46 @@ window.AIRBNB_DATA = {
           ]
         }
       ]
-    }
+    },
+    annualRecap: {
+      year: 2026,
+      totalNights: 18,
+      stays: 6,
+      citiesVisited: ["Annecy", "Lyon", "Chamonix", "Aix-les-Bains"],
+      savingsEuro: 312,
+      co2SavedKg: 145,
+      topStyle: "Séjours nature & gastronomie locale",
+      favoriteHost: "Sophie · Canal du Thiou"
+    },
+    communityClubs: [
+      {
+        id: "club-gastro",
+        name: "Club Terroir & Tables Alpines",
+        hostName: "Sophie",
+        hostRole: "Superhôte · Annecy",
+        members: 342,
+        nextEvent: "Jeu. 18 déc. · Live dégustation fromages & vins de Savoie",
+        joined: true
+      },
+      {
+        id: "club-archi",
+        name: "Club Architecture & Vieilles Pierres",
+        hostName: "Marc",
+        hostRole: "Architecte & Hôte · Ste-Claire",
+        members: 218,
+        nextEvent: "Sam. 20 déc. · Balade photo & histoire des canaux",
+        joined: false
+      },
+      {
+        id: "club-lac",
+        name: "Club Lac, Vélo & Mobilité Douce",
+        hostName: "Lucas",
+        hostRole: "Hôte · Les Marquisats",
+        members: 486,
+        nextEvent: "Dim. 21 déc. · Sortie voie verte & café au bord du lac",
+        joined: false
+      }
+    ]
   },
 
   // Filtres intelligents (Vue 1)
@@ -209,6 +248,9 @@ window.AIRBNB_DATA = {
           capacity: "8 pers. max",
           accessibility: "Accès PMR de plain-pied",
           rating: "4,96",
+          availableDays: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+          slotTime: "17h00",
+          hostNote: "Mon adresse fétiche pour découvrir la tomme fermière à 3 min à pied.",
           image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=700&q=80"
         },
         {
@@ -220,6 +262,9 @@ window.AIRBNB_DATA = {
           capacity: "10 pers. max",
           accessibility: "Navette gare incluse",
           rating: "4,91",
+          availableDays: [11, 12, 14, 15, 17, 18, 19, 20],
+          slotTime: "14h30",
+          hostNote: "Superbe vue sur les vignes, la navette vous récupère juste devant la gare.",
           image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=700&q=80"
         },
         {
@@ -231,9 +276,19 @@ window.AIRBNB_DATA = {
           capacity: "6 pers. max",
           accessibility: "À 6 min à pied du logement",
           rating: "4,98",
+          availableDays: [12, 13, 14, 16, 18, 19, 21],
+          slotTime: "10h30",
+          hostNote: "Clara est passionnante, parfait pour un matin calme face aux sommets.",
           image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=700&q=80"
         }
-      ]
+      ],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,69",
+        wouldReturnPct: 95,
+        summary: "Les voyageurs saluent unanimement la vue directe sur le canal du Thiou, la luminosité matinale et le calme étonnant malgré l'emplacement central. L'accueil précis de Sophie et la propreté irréprochable reviennent dans presque tous les retours.",
+        highlights: ["Vue canal & lumière naturelle", "Emplacement piéton idéal", "Literie et propreté 5 étoiles"],
+        watchOut: "Quelques visiteurs mentionnent le 2e étage sans ascenseur avec de grosses valises."
+      }
     },
     {
       id: "annecy-vieille-ville-atelier",
@@ -302,7 +357,14 @@ window.AIRBNB_DATA = {
         { icon: "train-front", title: "Hyper-centre piéton", detail: "Tout se fait à pied depuis la gare SNCF (6 min)." },
         { icon: "zap", title: "Électricité 100 % renouvelable", detail: "Contrat Enercoop Alpes vérifié." }
       ],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,69",
+        wouldReturnPct: 92,
+        summary: "Le charme des poutres apparentes et la décoration d'architecte séduisent particulièrement les couples et les télétravailleurs. Plusieurs séjours soulignent la qualité du Wi-Fi et la proximité immédiate des boulangeries de la rue Sainte-Claire.",
+        highlights: ["Cachet architectural unique", "Connexion fibre très fiable", "Vieille ville au pied de l'immeuble"],
+        watchOut: "Hauteur sous plafond mansardée sur une partie de la mezzanine pour les personnes très grandes."
+      }
     },
     {
       id: "annecy-palais-isle",
@@ -370,7 +432,14 @@ window.AIRBNB_DATA = {
       impactDetails: [
         { icon: "train-front", title: "100 % accessible sans voiture", detail: "Gare à 8 min, vélos en libre-service à 100 m." }
       ],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,69",
+        wouldReturnPct: 96,
+        summary: "La vue carte postale sur le Palais de l'Isle est décrite comme le grand point fort du séjour. Les hôtes apprécient également le double vitrage efficace qui permet de profiter de l'animation du centre tout en dormant au calme.",
+        highlights: ["Panorama direct sur le Palais de l'Isle", "Double vitrage très performant", "Arrivée autonome fluide"],
+        watchOut: "Stationnement difficile dans l'hyper-centre : le parking Sainte-Claire est conseillé."
+      }
     },
     {
       id: "annecy-albigny-villa",
@@ -436,7 +505,14 @@ window.AIRBNB_DATA = {
         ]
       },
       impactDetails: [],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,72",
+        wouldReturnPct: 94,
+        summary: "Idéale pour les familles ou groupes d'amis, la villa récolte d'excellents retours sur la piscine chauffée, le jardin clos et la cuisine très bien équipée. La plage d'Albigny à deux pas à pied est un vrai plus l'été.",
+        highlights: ["Piscine chauffée & terrasse spacieuse", "Plage d'Albigny à 4 min à pied", "Équipement cuisine complet"],
+        watchOut: "Nécessite 15 min de marche ou de vélo pour rejoindre la vieille ville."
+      }
     },
     {
       id: "annecy-imperial-duplex",
@@ -504,7 +580,14 @@ window.AIRBNB_DATA = {
       impactDetails: [
         { icon: "droplets", title: "Pompe à chaleur & isolation BBC", detail: "Consommation énergétique certifiée classe A." }
       ],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,74",
+        wouldReturnPct: 93,
+        summary: "Les voyageurs mettent en avant le panorama spectaculaire sur le lac depuis le salon et le calme résidentiel du quartier Impérial. Le confort des deux salles de bain rend le séjour très agréable à quatre.",
+        highlights: ["Vue lac panoramique", "Quartier chic et verdoyant", "Deux salles d'eau pratiques"],
+        watchOut: "L'accès au dernier étage se fait par un escalier intérieur un peu raide."
+      }
     },
     {
       id: "annecy-bonlieu-cocon",
@@ -572,7 +655,14 @@ window.AIRBNB_DATA = {
       impactDetails: [
         { icon: "train-front", title: "À 4 min de la gare TGV", detail: "Idéal pour un week-end 100 % train + marche." }
       ],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,66",
+        wouldReturnPct: 91,
+        summary: "Très apprécié pour son ambiance scandinave chaleureuse et sa propreté exemplaire. Les voyageurs soulignent qu'on rejoint le Pâquier et le bord du lac en 3 minutes à pied tout en restant dans une rue calme.",
+        highlights: ["Décoration nordique apaisante", "À 3 min du Pâquier et du lac", "Excellente isolation phonique"],
+        watchOut: "Cuisine compacte, parfaite pour le petit-déjeuner mais moins adaptée aux grands repas."
+      }
     },
     {
       id: "annecy-marquisats-chalet",
@@ -640,7 +730,14 @@ window.AIRBNB_DATA = {
       impactDetails: [
         { icon: "leaf", title: "Ossature bois locale", detail: "Construction éco-conçue en mélèze de Savoie." }
       ],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,71",
+        wouldReturnPct: 97,
+        summary: "Le spa privatif sur la terrasse en bois fait l'unanimité après une journée de randonnée ou de vélo. Les avis louent également la sensation de chalet montagnard tout en restant à quelques minutes de la plage des Marquisats.",
+        highlights: ["Spa privatif chauffé toute l'année", "Ambiance bois chaleureuse", "Proche voie verte du lac"],
+        watchOut: "Quelques marches extérieures pour accéder à l'entrée du chalet."
+      }
     },
     {
       id: "annecy-courier-design",
@@ -706,7 +803,14 @@ window.AIRBNB_DATA = {
         ]
       },
       impactDetails: [],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,62",
+        wouldReturnPct: 89,
+        summary: "Les voyageurs arrivant en train plébiscitent la proximité immédiate de la gare (4 min à pied) et l'équipement haut de gamme de l'appartement. Le balcon ensoleillé en fin d'après-midi est souvent cité comme un bonus appréciable.",
+        highlights: ["À 4 min à pied de la gare TGV", "Équipements neufs et design", "Balcon agréable au calme côté cour"],
+        watchOut: "Quartier commerçant vivant en journée, plus calme le soir."
+      }
     }
   ],
 
@@ -778,7 +882,14 @@ window.AIRBNB_DATA = {
       impactDetails: [
         { icon: "leaf", title: "Label Clef Verte 2026", detail: "Circuits courts pour le petit-déjeuner et zéro plastique à usage unique." }
       ],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,69",
+        wouldReturnPct: 92,
+        summary: "Les clients retiennent l'accueil attentionné de la réception, la qualité du petit-déjeuner composé de produits savoyards locaux et le confort des matelas. L'hôtel offre un vrai esprit maison d'hôtes en plein centre.",
+        highlights: ["Petit-déjeuner local généreux", "Personnel chaleureux et réactif", "Chambres calmes et bien isolées"],
+        watchOut: "Certaines chambres standards donnent sur une petite cour intérieure."
+      }
     },
     {
       id: "hotel-rive-lac",
@@ -844,7 +955,14 @@ window.AIRBNB_DATA = {
         ]
       },
       impactDetails: [],
-      localExperiences: []
+      localExperiences: [],
+      aiReviewsSummary: {
+        neighborhoodAvgRating: "4,73",
+        wouldReturnPct: 95,
+        summary: "L'auberge séduit par son jardin arboré, sa piscine extérieure face aux montagnes et la possibilité d'emprunter des vélos sur place. Les avis soulignent la tranquillité du lieu, idéale pour se ressourcer au bord du lac.",
+        highlights: ["Piscine et jardin face aux sommets", "Prêt de vélos très pratique", "Atmosphère paisible hors foule"],
+        watchOut: "Pensez à réserver la table du restaurant à l'avance le week-end."
+      }
     }
   ],
 
