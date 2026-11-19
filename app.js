@@ -128,11 +128,9 @@
   // ------------------------------------------------------------------------
   function renderSmartFilters() {
     const bar = document.getElementById("smart-filters-bar");
-    const tag = `<span class="audit-tag">Filtres intelligents (impact résultats)</span>`;
 
     if (state.activeTab === "services") {
-      bar.innerHTML = `${tag}
-        <span class="text-xs font-semibold text-[#717171] px-2">Services vérifiés à Annecy : mobilité électrique, bagagerie 24/7 &amp; expériences locales</span>`;
+      bar.innerHTML = `<span class="text-xs font-semibold text-[#717171] px-2">Services vérifiés à Annecy : mobilité électrique, bagagerie 24/7 &amp; expériences locales</span>`;
       return;
     }
 
@@ -157,7 +155,7 @@
       })
       .join("");
 
-    bar.innerHTML = tag + buttons;
+    bar.innerHTML = buttons;
     lucide.createIcons({ nodes: [bar] });
 
     bar.querySelectorAll(".filter-chip").forEach((btn) => {
@@ -538,9 +536,11 @@
       </div>
 
       <!-- Mosaïque 5 photos par pièce -->
-      <div class="mosaic-grid mb-5" data-audit="Photos par pièce">
+      <div class="relative mb-5" data-audit="Photos par pièce">
         <span class="audit-tag">Mosaïque 5 pièces labellisées</span>
-        ${mosaicHtml}
+        <div class="mosaic-grid">
+          ${mosaicHtml}
+        </div>
       </div>
 
       <!-- En-tête Above-the-fold : Localisation, Escalier & Sécurité -->
